@@ -21,30 +21,22 @@ function App() {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
-
-    async function loadProducts() {
-      setStatus("loading");
-      setIsMock(false);
-      try {
-        const { products: nextProducts, isMock: nextIsMock } =
-          await fetchProducts();
-        if (cancelled) return;
-        setProducts(nextProducts);
-        setIsMock(nextIsMock);
-        setStatus(nextProducts.length === 0 ? "empty" : "success");
-      } catch {
-        if (cancelled) return;
-        setStatus("error");
-      }
+  async function loadProducts() {
+    setStatus("loading");
+    setIsMock(false);
+    try {
+      const { products: nextProducts, isMock: nextIsMock } =
+        await fetchProducts();
+      setProducts(nextProducts);
+      setIsMock(nextIsMock);
+      setStatus(nextProducts.length === 0 ? "empty" : "success");
+    } catch {
+      setStatus("error");
     }
+  }
 
+  useEffect(() => {
     loadProducts();
-
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   const authChecking = user === "checking";
@@ -69,7 +61,14 @@ function App() {
         {status === "success" && (
           <>
             {isMock && (
-              <p>상품 서버에 연결할 수 없어 샘플 데이터를 표시합니다</p>
+              <div style={{ marginBottom: "12px" }}>
+                <p style={{ margin: "0 0 8px" }}>
+                  상품 서버에 연결할 수 없어 샘플 데이터를 표시합니다
+                </p>
+                <button type="button" onClick={loadProducts}>
+                  다시 시도
+                </button>
+              </div>
             )}
             <ProductList products={products} />
           </>
